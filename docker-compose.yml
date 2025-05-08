@@ -10,26 +10,40 @@ services:
     volumes:
       - mongo-data:/data/db
     networks:
-      - backend
+      - app-network
 
-  api:
+  backend:
     build:
-      context: ./api
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: attendance-api
+    container_name: attendance-backend
     depends_on:
       - mongo
     ports:
       - "8000:8000"
     environment:
       MONGO_URI: mongodb://mongo:27017/attendance
+    volumes:
+      - ./backend/app/images:/app/images
     networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: attendance-frontend
+    ports:
+      - "8080:80"
+    depends_on:
       - backend
+    networks:
+      - app-network
 
 volumes:
   mongo-data:
 
 
 networks:
-  backend:
+  app-network:
     driver: bridge

@@ -38,7 +38,7 @@ const Index = () => {
             <Toggle
               pressed={theme === 'dark'}
               onPressedChange={toggleTheme}
-              className="p-2 text-foreground/80 hover:text-foreground"
+              className="p-2 text-foreground/80 hover:text-foreground hover-button"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}

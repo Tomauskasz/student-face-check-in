@@ -3,3 +3,4 @@ uvicorn[standard]
 pymongo
 deepface
 python-multipart
+tf-keras
