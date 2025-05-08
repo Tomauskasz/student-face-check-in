@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,7 @@ interface Student {
   first_name: string;
   last_name: string;
   marked_today: boolean;
+  last_seen_date?: string | null;
 }
 
 const ViewAttendance = () => {
@@ -42,7 +42,23 @@ const ViewAttendance = () => {
   const [editStudent, setEditStudent] = useState<{ id: string; firstName: string; lastName: string } | null>(null);
   const { toast } = useToast();
 
+  const formatDate = (dateString: string | null | undefined): string => {
+    if (!dateString) {
+      return "Never";
+    }
+    try {
+      const date = new Date(dateString);
+      const datePart = date.toLocaleDateString();
+      const timePart = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `${datePart} ${timePart}`;
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return "Invalid Date";
+    }
+  };
+
   const fetchStudents = async () => {
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:8000/students");
       if (!response.ok) {
@@ -109,30 +125,32 @@ const ViewAttendance = () => {
   };
 
   const handleToggleAttendance = async (student: Student) => {
-    // In a real application, this would call the API to toggle attendance
-    // For this example, we'll just update the local state
+    const newMarkedStatus = !student.marked_today;
     try {
-      // Optimistically update the UI
-      const updatedStudents = students.map((s) =>
-        s._id === student._id ? { ...s, marked_today: !s.marked_today } : s
-      );
+      const response = await fetch(`http://localhost:8000/students/${student._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ marked_today: newMarkedStatus }),
+      });
 
-      setStudents(updatedStudents);
-      setFilteredStudents(
-        filteredStudents.map((s) =>
-          s._id === student._id ? { ...s, marked_today: !s.marked_today } : s
-        )
-      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Failed to update attendance status." }));
+        throw new Error(errorData.detail || "Failed to update attendance status.");
+      }
+
+      await fetchStudents();
 
       toast({
         title: "Attendance Updated",
-        description: `${student.first_name}'s attendance has been ${!student.marked_today ? "marked" : "unmarked"}.`,
+        description: `${student.first_name}'s attendance has been ${newMarkedStatus ? "marked as Present" : "marked as Absent"}.`,
       });
     } catch (error) {
       console.error("Error toggling attendance:", error);
       toast({
         title: "Error",
-        description: "Failed to update attendance status. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update attendance status. Please try again.",
         variant: "destructive",
       });
     }
@@ -146,25 +164,33 @@ const ViewAttendance = () => {
   const handleDelete = async () => {
     if (!studentToDelete) return;
 
-    // In a real application this would call an API to delete the student
     try {
-      // Here we're simulating a successful deletion
-      setStudents(students.filter((s) => s._id !== studentToDelete._id));
-      setFilteredStudents(filteredStudents.filter((s) => s._id !== studentToDelete._id));
+      const response = await fetch(`http://localhost:8000/students/${studentToDelete._id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Failed to delete student." }));
+        throw new Error(errorData.detail || "Failed to delete student.");
+      }
 
       setIsDeleteDialogOpen(false);
+      const deletedStudentName = `${studentToDelete.first_name} ${studentToDelete.last_name}`;
       setStudentToDelete(null);
+      await fetchStudents();
 
       toast({
         title: "Student Deleted",
-        description: `${studentToDelete.first_name} ${studentToDelete.last_name} has been removed from the system.`,
+        description: `${deletedStudentName} has been removed from the system.`,
       });
     } catch (error) {
+      console.error("Error deleting student:", error);
       toast({
         title: "Error",
-        description: "Failed to delete student. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to delete student. Please try again.",
         variant: "destructive",
       });
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -180,35 +206,36 @@ const ViewAttendance = () => {
   const handleEdit = async () => {
     if (!editStudent) return;
 
-    // In a real application this would call an API to update the student
     try {
-      // Here we're simulating a successful update
-      const updatedStudents = students.map((s) =>
-        s._id === editStudent.id
-          ? { ...s, first_name: editStudent.firstName, last_name: editStudent.lastName }
-          : s
-      );
+      const response = await fetch(`http://localhost:8000/students/${editStudent.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          first_name: editStudent.firstName,
+          last_name: editStudent.lastName
+        }),
+      });
 
-      setStudents(updatedStudents);
-      setFilteredStudents(
-        filteredStudents.map((s) =>
-          s._id === editStudent.id
-            ? { ...s, first_name: editStudent.firstName, last_name: editStudent.lastName }
-            : s
-        )
-      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Failed to update student information." }));
+        throw new Error(errorData.detail || "Failed to update student information.");
+      }
 
       setIsEditDialogOpen(false);
       setEditStudent(null);
+      await fetchStudents();
 
       toast({
         title: "Student Updated",
         description: "Student information has been successfully updated.",
       });
     } catch (error) {
+      console.error("Error updating student:", error);
       toast({
         title: "Error",
-        description: "Failed to update student information. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update student information. Please try again.",
         variant: "destructive",
       });
     }
@@ -280,11 +307,12 @@ const ViewAttendance = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>First Name</TableHead>
-                      <TableHead>Last Name</TableHead>
-                      <TableHead>Attendance Status</TableHead>
-                      <TableHead>Actions</TableHead>
+                      {/* <TableHead>ID</TableHead> Removed ID Header */}
+                      <TableHead className="text-center">First Name</TableHead>
+                      <TableHead className="text-center">Last Name</TableHead>
+                      <TableHead className="text-center">Attendance Status</TableHead>
+                      <TableHead className="text-center">Last Seen</TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -296,10 +324,10 @@ const ViewAttendance = () => {
                         transition={{ delay: index * 0.05 }}
                         className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                       >
-                        <TableCell className="text-gray-500 font-mono">{student._id.slice(0, 8)}...</TableCell>
-                        <TableCell>{student.first_name}</TableCell>
-                        <TableCell>{student.last_name}</TableCell>
-                        <TableCell>
+                        {/* <TableCell className="text-gray-500 font-mono">{student._id.slice(0, 8)}...</TableCell> Removed ID Cell */}
+                        <TableCell className="text-center">{student.first_name}</TableCell>
+                        <TableCell className="text-center">{student.last_name}</TableCell>
+                        <TableCell className="text-center">
                           <Badge
                             onClick={() => handleToggleAttendance(student)}
                             className={`cursor-pointer transition-all duration-300 ${student.marked_today
@@ -310,8 +338,11 @@ const ViewAttendance = () => {
                             {student.marked_today ? "Present" : "Absent"}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
+                        <TableCell className="text-center">
+                          {formatDate(student.last_seen_date)}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex gap-2 justify-center">
                             <Button
                               variant="ghost"
                               size="icon"

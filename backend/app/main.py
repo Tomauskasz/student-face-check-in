@@ -2,6 +2,10 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
+from bson.objectid import ObjectId
+from pydantic import BaseModel, Field
+from typing import Optional
+from datetime import datetime, timezone
 from deepface import DeepFace
 import os
 import uuid
@@ -41,6 +45,12 @@ os.makedirs(IMAGES_DIR, exist_ok=True)
 LITHUANIAN_TITLE_CASE_REGEX = r"^[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž]*$"
 
 
+class StudentUpdate(BaseModel):
+    first_name: Optional[str] = Field(None, pattern=LITHUANIAN_TITLE_CASE_REGEX)
+    last_name: Optional[str] = Field(None, pattern=LITHUANIAN_TITLE_CASE_REGEX)
+    marked_today: Optional[bool] = None
+
+
 def save_uploaded_file(upload_file: UploadFile, target_dir: str) -> str:
     """Išsaugo įkeltą failą į target_dir ir grąžina pilną kelią."""
     ext = os.path.splitext(upload_file.filename)[1]
@@ -78,6 +88,8 @@ async def register_student(
         "last_name": last_name.strip(),
         "image_path": img_path,
         "marked_today": False,
+        "registration_date": datetime.now(timezone.utc),
+        "last_seen_date": None,
     }
     result = students_coll.insert_one(student_doc)
     return JSONResponse(
@@ -131,8 +143,10 @@ async def mark_attendance(
         # 4. Patikriname atsakymą
         if result.get("verified"):
             # atnaujiname attendance flag
+            current_time_utc = datetime.now(timezone.utc)
             students_coll.update_one(
-                {"_id": student["_id"]}, {"$set": {"marked_today": True}}
+                {"_id": student["_id"]},
+                {"$set": {"marked_today": True, "last_seen_date": current_time_utc}},
             )
             return {"message": "Attendance marked"}
         else:
@@ -153,3 +167,95 @@ def reset_marks():
     """Atstatome visiems marked_today = False (tarkime kasdien)."""
     students_coll.update_many({}, {"$set": {"marked_today": False}})
     return {"message": "All marks reset"}
+
+
+@app.put("/students/{student_id}")
+async def update_student_details(student_id: str, student_update: StudentUpdate):
+    if not ObjectId.is_valid(student_id):
+        raise HTTPException(status_code=400, detail="Invalid student ID format")
+
+    update_data = student_update.model_dump(exclude_unset=True)
+
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No update data provided")
+
+    # Validate names if provided
+    if "first_name" in update_data and not re.match(
+        LITHUANIAN_TITLE_CASE_REGEX, update_data["first_name"]
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="First name must be in Title Case and can include Lithuanian characters.",
+        )
+    if "last_name" in update_data and not re.match(
+        LITHUANIAN_TITLE_CASE_REGEX, update_data["last_name"]
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Last name must be in Title Case and can include Lithuanian characters.",
+        )
+
+    update_fields = {}
+    if "first_name" in update_data:
+        update_fields["first_name"] = update_data["first_name"]
+    if "last_name" in update_data:
+        update_fields["last_name"] = update_data["last_name"]
+    if "marked_today" in update_data:
+        update_fields["marked_today"] = update_data["marked_today"]
+        if update_data["marked_today"] is True:
+            update_fields["last_seen_date"] = datetime.now(timezone.utc)
+        # If marked_today is set to False, last_seen_date is not changed
+
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No valid update fields provided")
+
+    result = students_coll.update_one(
+        {"_id": ObjectId(student_id)}, {"$set": update_fields}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    updated_student_doc = students_coll.find_one({"_id": ObjectId(student_id)})
+    if updated_student_doc:
+        updated_student_doc["_id"] = str(updated_student_doc["_id"])
+        # Ensure image_path is not sent if it exists, unless specifically requested
+        if "image_path" in updated_student_doc:
+            del updated_student_doc["image_path"]
+        return updated_student_doc
+    else:  # Should not happen if matched_count > 0 and update was successful
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve updated student"
+        )
+
+
+@app.delete("/students/{student_id}")
+async def delete_student_by_id(student_id: str):
+    if not ObjectId.is_valid(student_id):
+        raise HTTPException(status_code=400, detail="Invalid student ID format")
+
+    student_to_delete = students_coll.find_one({"_id": ObjectId(student_id)})
+    if not student_to_delete:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # Optional: Delete student's image from the filesystem
+    image_path_to_delete = student_to_delete.get("image_path")
+    if image_path_to_delete and os.path.exists(image_path_to_delete):
+        try:
+            os.remove(image_path_to_delete)
+        except OSError as e:
+            # Log this error, but don't let it block student deletion from DB
+            print(f"Error deleting image file {image_path_to_delete}: {e}")
+
+    result = students_coll.delete_one({"_id": ObjectId(student_id)})
+
+    if result.deleted_count == 0:
+        # This case should ideally be caught by the find_one check above,
+        # but as a safeguard:
+        raise HTTPException(
+            status_code=404, detail="Student not found or already deleted"
+        )
+
+    return JSONResponse(
+        status_code=200, content={"message": "Student deleted successfully"}
+    )

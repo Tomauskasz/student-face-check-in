@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,11 +20,11 @@ const Index = () => {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
@@ -39,14 +38,14 @@ const Index = () => {
           </p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           variants={container}
           initial="hidden"
           animate="show"
           className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
           <motion.div variants={item}>
-            <Card className="hover:shadow-xl transition-all duration-300 border-t-4 border-blue-500 h-full">
+            <Card className="hover:shadow-xl transition-all duration-300 border-t-4 border-blue-500 h-full flex flex-col">
               <CardHeader className="text-center">
                 <div className="mx-auto bg-blue-100 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-6">
                   <FileText className="h-10 w-10 text-blue-600" />
@@ -54,7 +53,7 @@ const Index = () => {
                 <CardTitle className="text-2xl">View Attendance</CardTitle>
                 <CardDescription className="text-base mt-2">Check and manage student attendance records</CardDescription>
               </CardHeader>
-              <CardContent className="text-center">
+              <CardContent className="text-center flex-grow">
                 <p className="text-gray-600 mb-6">Access the complete list of students and their attendance status, with options to search, edit, and manage records.</p>
               </CardContent>
               <CardFooter className="flex justify-center pt-4">
@@ -68,7 +67,7 @@ const Index = () => {
           </motion.div>
 
           <motion.div variants={item}>
-            <Card className="hover:shadow-xl transition-all duration-300 border-t-4 border-green-500 h-full">
+            <Card className="hover:shadow-xl transition-all duration-300 border-t-4 border-green-500 h-full flex flex-col">
               <CardHeader className="text-center">
                 <div className="mx-auto bg-green-100 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-6">
                   <User className="h-10 w-10 text-green-600" />
@@ -76,7 +75,7 @@ const Index = () => {
                 <CardTitle className="text-2xl">Register Student</CardTitle>
                 <CardDescription className="text-base mt-2">Add new students to the system</CardDescription>
               </CardHeader>
-              <CardContent className="text-center">
+              <CardContent className="text-center flex-grow">
                 <p className="text-gray-600 mb-6">Register a new student by providing their details and uploading a photo for facial recognition verification.</p>
               </CardContent>
               <CardFooter className="flex justify-center pt-4">
@@ -90,7 +89,7 @@ const Index = () => {
           </motion.div>
 
           <motion.div variants={item}>
-            <Card className="hover:shadow-xl transition-all duration-300 border-t-4 border-purple-500 h-full">
+            <Card className="hover:shadow-xl transition-all duration-300 border-t-4 border-purple-500 h-full flex flex-col">
               <CardHeader className="text-center">
                 <div className="mx-auto bg-purple-100 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-6">
                   <Calendar className="h-10 w-10 text-purple-600" />
@@ -98,7 +97,7 @@ const Index = () => {
                 <CardTitle className="text-2xl">Mark Attendance</CardTitle>
                 <CardDescription className="text-base mt-2">Record student presence with face verification</CardDescription>
               </CardHeader>
-              <CardContent className="text-center">
+              <CardContent className="text-center flex-grow">
                 <p className="text-gray-600 mb-6">Mark a student as present by verifying their identity with facial recognition technology.</p>
               </CardContent>
               <CardFooter className="flex justify-center pt-4">
@@ -112,7 +111,7 @@ const Index = () => {
           </motion.div>
         </motion.div>
 
-        <motion.footer 
+        <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
