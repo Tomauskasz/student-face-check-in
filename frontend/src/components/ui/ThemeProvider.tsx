@@ -1,5 +1,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { Toggle } from "@/components/ui/toggle";
+import { Sun, Moon } from "lucide-react";
 
 type Theme = "dark" | "light";
 
@@ -39,4 +41,19 @@ export const useTheme = () => {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
+};
+
+export const ThemeToggle = () => {
+  const { theme, toggleTheme } = useTheme();
+  
+  return (
+    <Toggle
+      pressed={theme === 'dark'}
+      onPressedChange={toggleTheme}
+      className="p-2 text-foreground/80 hover:text-foreground"
+      aria-label="Toggle theme"
+    >
+      {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+    </Toggle>
+  );
 };

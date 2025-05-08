@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, Upload } from "lucide-react";
+import { motion } from "framer-motion";
+import { ThemeToggle } from "@/components/ui/ThemeProvider";
 
 const MarkAttendance = () => {
   const [firstName, setFirstName] = useState("");
@@ -122,15 +125,23 @@ const MarkAttendance = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-background text-foreground p-6 transition-colors duration-300"
+    >
       <div className="container mx-auto max-w-2xl">
-        <Link to="/">
-          <Button variant="outline" className="mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
-          </Button>
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/">
+            <Button variant="outline" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" /> Back to Home
+            </Button>
+          </Link>
+          <ThemeToggle />
+        </div>
 
-        <Card className="shadow-lg">
+        <Card className="shadow-lg border border-border transition-colors duration-300">
           <CardHeader>
             <CardTitle className="text-center text-2xl">Mark Student Attendance</CardTitle>
           </CardHeader>
@@ -145,8 +156,9 @@ const MarkAttendance = () => {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
+                    className="bg-background border-input"
                   />
-                  <p className="text-xs text-gray-500">Example: John</p>
+                  <p className="text-xs text-muted-foreground">Example: John</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name</Label>
@@ -156,14 +168,15 @@ const MarkAttendance = () => {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
+                    className="bg-background border-input"
                   />
-                  <p className="text-xs text-gray-500">Example: Smith</p>
+                  <p className="text-xs text-muted-foreground">Example: Smith</p>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label>Student Photo for Verification</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/40 transition-colors">
                   <input
                     type="file"
                     id="photo"
@@ -183,13 +196,13 @@ const MarkAttendance = () => {
                       />
                     ) : (
                       <>
-                        <div className="bg-gray-100 rounded-full p-3">
-                          <Upload className="h-6 w-6 text-purple-500" />
+                        <div className="bg-muted rounded-full p-3">
+                          <Upload className="h-6 w-6 text-purple-500 dark:text-purple-400" />
                         </div>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-foreground">
                           Click to upload current photo
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           The system will verify this with the registered photo
                         </span>
                       </>
@@ -201,7 +214,7 @@ const MarkAttendance = () => {
               <div className="flex justify-center pt-4">
                 <Button
                   type="submit"
-                  className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700"
+                  className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800"
                   disabled={loading}
                 >
                   {loading ? (
@@ -218,7 +231,7 @@ const MarkAttendance = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

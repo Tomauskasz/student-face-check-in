@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ThemeToggle } from "@/components/ui/ThemeProvider";
 
 interface Student {
   _id: string;
@@ -247,21 +248,22 @@ const ViewAttendance = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gray-50 p-6"
+      className="min-h-screen bg-background text-foreground p-6 transition-colors duration-300"
     >
       <div className="container mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-          <div className="mb-4 sm:mb-0">
+          <div className="mb-4 sm:mb-0 flex items-center gap-4">
             <Link to="/">
               <Button variant="outline" className="mb-4 sm:mb-0">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
               </Button>
             </Link>
+            <ThemeToggle />
           </div>
           <Button
             onClick={handleResetAttendance}
             variant="outline"
-            className="bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-200"
+            className="border-red-600 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200"
           >
             Reset All Attendance
           </Button>
@@ -271,35 +273,35 @@ const ViewAttendance = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="bg-white shadow-md rounded-lg overflow-hidden"
+          className="bg-card text-card-foreground shadow-md rounded-lg overflow-hidden border border-border transition-colors duration-300"
         >
-          <div className="p-6 border-b border-gray-200">
-            <h1 className="text-2xl font-semibold text-gray-800">Student Attendance</h1>
-            <p className="text-gray-600">View and manage today's attendance records</p>
+          <div className="p-6 border-b border-border">
+            <h1 className="text-2xl font-semibold">Student Attendance</h1>
+            <p className="text-muted-foreground">View and manage today's attendance records</p>
           </div>
 
           {loading ? (
             <div className="p-8 text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-              <p className="mt-4 text-gray-600">Loading attendance data...</p>
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+              <p className="mt-4 text-muted-foreground">Loading attendance data...</p>
             </div>
           ) : students.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-gray-600">No students registered yet.</p>
+              <p className="text-muted-foreground">No students registered yet.</p>
               <Link to="/register-student">
                 <Button className="mt-4">Register a Student</Button>
               </Link>
             </div>
           ) : (
             <div>
-              <div className="p-4 border-b border-gray-100">
+              <div className="p-4 border-b border-border">
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by name..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 max-w-md"
+                    className="pl-10 max-w-md bg-background"
                   />
                 </div>
               </div>
@@ -307,7 +309,6 @@ const ViewAttendance = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      {/* <TableHead>ID</TableHead> Removed ID Header */}
                       <TableHead className="text-center">First Name</TableHead>
                       <TableHead className="text-center">Last Name</TableHead>
                       <TableHead className="text-center">Attendance Status</TableHead>
@@ -324,7 +325,6 @@ const ViewAttendance = () => {
                         transition={{ delay: index * 0.05 }}
                         className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                       >
-                        {/* <TableCell className="text-gray-500 font-mono">{student._id.slice(0, 8)}...</TableCell> Removed ID Cell */}
                         <TableCell className="text-center">{student.first_name}</TableCell>
                         <TableCell className="text-center">{student.last_name}</TableCell>
                         <TableCell className="text-center">
