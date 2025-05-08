@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,34 +18,34 @@ const MarkAttendance = () => {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      // Revoke previous preview URL to avoid memory leaks
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
       setPhoto(file);
       setPhotoPreview(URL.createObjectURL(file));
     }
   };
 
   const isFormValid = () => {
-    // Check if first name is Title Case
-    const isFirstNameValid = firstName && /^[A-Z][a-z]*$/.test(firstName);
-    if (!isFirstNameValid) {
+    // Check if first name is Title Case and allows Lithuanian characters
+    if (!firstName || !/^[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž]*$/.test(firstName)) {
       toast({
         title: "Invalid First Name",
-        description: "First name must be in Title Case (e.g., 'John').",
+        description: "First name must be in Title Case (e.g., 'John', 'Ąžuolas').",
         variant: "destructive",
       });
       return false;
     }
-
-    // Check if last name is Title Case
-    const isLastNameValid = lastName && /^[A-Z][a-z]*$/.test(lastName);
-    if (!isLastNameValid) {
+    // Check if last name is Title Case and allows Lithuanian characters
+    if (!lastName || !/^[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž]*$/.test(lastName)) {
       toast({
         title: "Invalid Last Name",
-        description: "Last name must be in Title Case (e.g., 'Doe').",
+        description: "Last name must be in Title Case (e.g., 'Doe', 'Kazlauskas').",
         variant: "destructive",
       });
       return false;
     }
-
     // Check if photo is selected
     if (!photo) {
       toast({
@@ -56,7 +55,6 @@ const MarkAttendance = () => {
       });
       return false;
     }
-
     return true;
   };
 
@@ -101,18 +99,18 @@ const MarkAttendance = () => {
     } catch (error) {
       console.error("Error marking attendance:", error);
       let errorMessage = "Failed to mark attendance. Please try again.";
-      
+
       if (error instanceof Error) {
         // Handle specific error cases
         if (error.message.includes("Student not found")) {
           errorMessage = "Student not found. Please check name spelling or register the student.";
         } else if (error.message.includes("Face did not match")) {
-          errorMessage = "Face verification failed. Please try again with a clearer photo.";
+          errorMessage = "Face verification failed. Either this is not the right student or the photo is not clear. Please try again with a clearer photo.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
       toast({
         title: "Attendance Marking Failed",
         description: errorMessage,

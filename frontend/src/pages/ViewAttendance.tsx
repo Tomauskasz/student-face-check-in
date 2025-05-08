@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -26,29 +25,29 @@ const ViewAttendance = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const response = await fetch("http://localhost:8000/students");
-        if (!response.ok) {
-          throw new Error("Failed to fetch students");
-        }
-        const data = await response.json();
-        setStudents(data.students);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load student data. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/students");
+      if (!response.ok) {
+        throw new Error("Failed to fetch students");
       }
-    };
+      const data = await response.json();
+      setStudents(data.students);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load student data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchStudents();
-  }, [toast]);
+  }, []);
 
   const handleResetAttendance = async () => {
     try {
@@ -78,7 +77,7 @@ const ViewAttendance = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div key="view-attendance-root" className="min-h-screen bg-gray-50 p-6">
       <div className="container mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div className="mb-4 sm:mb-0">

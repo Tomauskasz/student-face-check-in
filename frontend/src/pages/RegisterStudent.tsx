@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,34 +18,34 @@ const RegisterStudent = () => {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      // Revoke previous preview URL to avoid memory leaks
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
       setPhoto(file);
       setPhotoPreview(URL.createObjectURL(file));
     }
   };
 
   const isFormValid = () => {
-    // Check if first name is Title Case
-    const isFirstNameValid = firstName && /^[A-Z][a-z]*$/.test(firstName);
-    if (!isFirstNameValid) {
+    // Check if first name is Title Case and allows Lithuanian characters
+    if (!firstName || !/^[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž]*$/.test(firstName)) {
       toast({
         title: "Invalid First Name",
-        description: "First name must be in Title Case (e.g., 'John').",
+        description: "First name must be in Title Case (e.g., 'John', 'Ąžuolas').",
         variant: "destructive",
       });
       return false;
     }
-
-    // Check if last name is Title Case
-    const isLastNameValid = lastName && /^[A-Z][a-z]*$/.test(lastName);
-    if (!isLastNameValid) {
+    // Check if last name is Title Case and allows Lithuanian characters
+    if (!lastName || !/^[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž]*$/.test(lastName)) {
       toast({
         title: "Invalid Last Name",
-        description: "Last name must be in Title Case (e.g., 'Doe').",
+        description: "Last name must be in Title Case (e.g., 'Doe', 'Kazlauskas').",
         variant: "destructive",
       });
       return false;
     }
-
     // Check if photo is selected
     if (!photo) {
       toast({
@@ -56,7 +55,6 @@ const RegisterStudent = () => {
       });
       return false;
     }
-
     return true;
   };
 

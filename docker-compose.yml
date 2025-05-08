@@ -1,0 +1,35 @@
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: attendance
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - backend
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: attendance-api
+    depends_on:
+      - mongo
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URI: mongodb://mongo:27017/attendance
+    networks:
+      - backend
+
+volumes:
+  mongo-data:
+
+
+networks:
+  backend:
+    driver: bridge
