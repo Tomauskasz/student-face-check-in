@@ -113,17 +113,17 @@ const ViewAttendance = () => {
     // For this example, we'll just update the local state
     try {
       // Optimistically update the UI
-      const updatedStudents = students.map((s) => 
+      const updatedStudents = students.map((s) =>
         s._id === student._id ? { ...s, marked_today: !s.marked_today } : s
       );
-      
+
       setStudents(updatedStudents);
       setFilteredStudents(
-        filteredStudents.map((s) => 
+        filteredStudents.map((s) =>
           s._id === student._id ? { ...s, marked_today: !s.marked_today } : s
         )
       );
-      
+
       toast({
         title: "Attendance Updated",
         description: `${student.first_name}'s attendance has been ${!student.marked_today ? "marked" : "unmarked"}.`,
@@ -151,10 +151,10 @@ const ViewAttendance = () => {
       // Here we're simulating a successful deletion
       setStudents(students.filter((s) => s._id !== studentToDelete._id));
       setFilteredStudents(filteredStudents.filter((s) => s._id !== studentToDelete._id));
-      
+
       setIsDeleteDialogOpen(false);
       setStudentToDelete(null);
-      
+
       toast({
         title: "Student Deleted",
         description: `${studentToDelete.first_name} ${studentToDelete.last_name} has been removed from the system.`,
@@ -188,7 +188,7 @@ const ViewAttendance = () => {
           ? { ...s, first_name: editStudent.firstName, last_name: editStudent.lastName }
           : s
       );
-      
+
       setStudents(updatedStudents);
       setFilteredStudents(
         filteredStudents.map((s) =>
@@ -197,10 +197,10 @@ const ViewAttendance = () => {
             : s
         )
       );
-      
+
       setIsEditDialogOpen(false);
       setEditStudent(null);
-      
+
       toast({
         title: "Student Updated",
         description: "Student information has been successfully updated.",
@@ -231,18 +231,18 @@ const ViewAttendance = () => {
               </Button>
             </Link>
           </div>
-          <Button 
-            onClick={handleResetAttendance} 
-            variant="outline" 
+          <Button
+            onClick={handleResetAttendance}
+            variant="outline"
             className="bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-200"
           >
             Reset All Attendance
           </Button>
         </div>
 
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }} 
-          animate={{ y: 0, opacity: 1 }} 
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
           className="bg-white shadow-md rounded-lg overflow-hidden"
         >
@@ -302,11 +302,10 @@ const ViewAttendance = () => {
                         <TableCell>
                           <Badge
                             onClick={() => handleToggleAttendance(student)}
-                            className={`cursor-pointer transition-all duration-300 ${
-                              student.marked_today
-                                ? "bg-green-100 text-green-800 hover:bg-green-200"
-                                : "bg-red-50 text-red-600 border-red-300 hover:bg-red-100"
-                            }`}
+                            className={`cursor-pointer transition-all duration-300 ${student.marked_today
+                              ? "bg-green-100 text-green-800 hover:bg-green-200"
+                              : "bg-red-50 text-red-600 border-red-300 hover:bg-red-100"
+                              }`}
                           >
                             {student.marked_today ? "Present" : "Absent"}
                           </Badge>
