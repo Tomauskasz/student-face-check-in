@@ -53,7 +53,7 @@ student-face-check-in/
 │   │   ├── Index.tsx       # Landing page component
 │   │   ├── main.tsx        # React application entry point
 │   │   ├── pages/          # Page components (ViewAttendance, RegisterStudent, etc.)
-│   │   ├── components/     # Reusable UI components (likely Shadcn/UI)
+│   │   ├── components/     # Reusable UI components (mostly Shadcn/UI)
 │   │   └── index.css       # Global styles and Tailwind CSS setup
 │   ├── Dockerfile          # Dockerfile for the frontend service (Nginx)
 │   └── package.json        # Frontend dependencies
