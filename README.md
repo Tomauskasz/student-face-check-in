@@ -47,13 +47,25 @@ student-face-check-in/
 │   ├── Dockerfile          # Dockerfile for the backend service
 │   └── requirements.txt    # Python dependencies
 ├── frontend/
-│   ├── public/
+│   ├── public/             # Static assets
+│   │   ├── favicon.ico
+│   │   ├── placeholder.svg
+│   │   └── robots.txt
 │   ├── src/
-│   │   ├── App.tsx         # Main application component with routing
-│   │   ├── Index.tsx       # Landing page component
+│   │   ├── App.tsx         # Main application component with routing setup
+│   │   ├── Index.tsx       # Landing page component, provides navigation
 │   │   ├── main.tsx        # React application entry point
-│   │   ├── pages/          # Page components (ViewAttendance, RegisterStudent, etc.)
-│   │   ├── components/     # Reusable UI components (likely Shadcn/UI)
+│   │   ├── pages/          # Page components
+│   │   │   ├── MarkAttendance.tsx  # Page for marking student attendance via face verification
+│   │   │   ├── NotFound.tsx      # Page displayed for invalid routes (404)
+│   │   │   ├── RegisterStudent.tsx # Page for registering new students with photo upload
+│   │   │   └── ViewAttendance.tsx  # Page for viewing and managing student attendance records
+│   │   ├── components/     # Reusable UI components (mostly Shadcn/UI)
+│   │   ├── hooks/          # Custom React hooks
+│   │   │   ├── use-toast.ts
+│   │   │   └── use-mobile.tsx
+│   │   ├── lib/            # Utility functions
+│   │   │   └── utils.ts
 │   │   └── index.css       # Global styles and Tailwind CSS setup
 │   ├── Dockerfile          # Dockerfile for the frontend service (Nginx)
 │   └── package.json        # Frontend dependencies
@@ -110,16 +122,26 @@ The backend FastAPI application exposes the following endpoints (defined in `bac
 The React frontend provides the following pages/routes (defined in `frontend/src/App.tsx`):
 
 -   `/` : **Landing Page** (`Index.tsx`)
-    -   Displays an overview of the system and navigation links to other sections.
+    -   Displays an overview of the Student Attendance System, its features, and provides navigation links to the main sections (View Attendance, Register Student, Mark Attendance).
 -   `/view-attendance` : **View Attendance** (`pages/ViewAttendance.tsx`)
-    -   Shows a table of all students, their registration details, and current attendance status.
-    -   Allows users to search, edit, and delete students.
+    -   Shows a comprehensive table of all registered students.
+    -   Displays student details such as first name, last name, attendance status (`marked_today`), and the last seen date/time.
+    -   Allows users to search for students by name.
+    -   Provides functionality to manually toggle a student's attendance status.
+    -   Offers options to edit student information (first name, last name).
+    -   Allows for the deletion of students from the system.
+    -   Includes a feature to reset the attendance status for all students (e.g., at the start of a new day).
 -   `/register-student` : **Register Student** (`pages/RegisterStudent.tsx`)
-    -   A form to register new students by providing their name, surname, and uploading a photo.
+    -   Provides a form for adding new students to the system.
+    -   Requires input for the student's first name, last name (validated for title case and Lithuanian characters), and a photograph for facial recognition.
+    -   Includes a photo preview feature before submission.
 -   `/mark-attendance` : **Mark Attendance** (`pages/MarkAttendance.tsx`)
-    -   A form to mark a student's attendance by providing their name, surname, and uploading a current photo for face verification.
+    -   Enables marking a student as present via facial recognition.
+    -   Requires the student's first name and last name to identify them.
+    -   Users upload a current photo of the student, which is then compared against their registered image by the backend.
+    -   Provides feedback on whether the face verification was successful or not.
 -   `*` : **Not Found** (`pages/NotFound.tsx`)
-    -   A generic 404 page for invalid routes.
+    -   A generic 404 page displayed when a user navigates to a non-existent route, offering a link to return to the home page.
 
 ## Notes
 
